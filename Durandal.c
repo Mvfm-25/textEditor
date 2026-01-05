@@ -4,17 +4,25 @@
 // Criado : 05/01/2026  || Última modificação : 05/01/2026
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
+
+// 'Reseta' o terminal para o estado inicial após o uso do 'modoCru'
+struct termios termios_velho;
+void desabilitaCru() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &termios_velho);
+}
 
 // Simplesmente, não vou estar mais printando o que o usuário digita enquanto digita.
 // Coisa de banco.
 void modoCru() {
-    struct termios cru;
+    tcgetattr(STDIN_FILENO, &termios_velho);
+    atexit(desabilitaCru);
 
-    tcgetattr(STDIN_FILENO, &cru);
-
-    cru.c_lflag &= ~(ECHO);
+    struct termios cru = termios_velho;
+    // Desligando modo canônico, lendo agora byte-per-byte ao invés de por linhas.
+    cru.c_lflag &= ~(ECHO | ICANON);
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &cru);
 }
