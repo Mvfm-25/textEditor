@@ -3,6 +3,7 @@
 //
 // Criado : 05/01/2026  || Última modificação : 05/01/2026
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,7 +33,14 @@ int main() {
 
     // Lendo individualmente cada caracter do usuário. 'q' para terminar.
     char chara;
-    while (read(STDIN_FILENO, &chara, 1) == 1 && chara != 'q');
+    while (read(STDIN_FILENO, &chara, 1) == 1 && chara != 'q') {
+        // Printa valores ASCII de cada caracter, menos se forem 'Control Characters'
+        if (iscntrl(chara)) {
+            printf("%d\n", chara);
+        } else {
+            printf("%d ('%c')\n", chara, chara);
+        }
+    }
 
     return 0;
 }
