@@ -22,8 +22,14 @@ void modoCru() {
     atexit(desabilitaCru);
 
     struct termios cru = termios_velho;
-    // Desligando modo canônico, lendo agora byte-per-byte ao invés de por linhas.
-    cru.c_lflag &= ~(ECHO | ICANON);
+    // Todos esses comandos vem diretamente de <termios.h>
+    // 'IXION' Impede com que Ctrl-S & Ctrl-Q controlem o 'software flow control'.
+    // 'ICRNL' Lê literalmente Ctrl-M como 13, ao invés de 10.
+    cru.c_lflag &= ~(ICRNL | IXION);
+    // 'ICANON' Desligando modo canônico, lendo agora byte-per-byte ao invés de por linhas.
+    // 'ISIG' Impedindo que Ctrl-C & Ctrl-Z fechem o programa.
+    // 'IEXTEN' Lida com o Ctrl-V
+    cru.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &cru);
 }
