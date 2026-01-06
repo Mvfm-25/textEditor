@@ -14,21 +14,14 @@
 /*** Definições ***/
 #define CTRL_KEY(k) ((k) & 0x1f)
 
-/*** Output ***/
-void limpaTela() {
-    // Printando 4bytes para uma sequência de 'escape' no terminal pra limpar a tela.
-    // Vai ajudar depois pra parte visual do programa.
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-    // Re-Posiciona o cursor no canto-esquerdo superior.
-    write(STDOUT_FILENO, "\x1b[H", 3);
-}
-
 /*** Terminal. ***/
 
 // Função pra lidar com MORTES
 // Erros. Mortes são erros. Simplesmente printa messagem de erro e sai do programa.
 void morre(const char *s) {
-    limpaTela();
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
     perror(s);
     exit(1);
 }
@@ -88,6 +81,27 @@ char leTecla() {
     return chara;
 }
 
+/*** Output ***/
+// Desenha ~ ao lado do terminal como Vim.
+// altura 10 foi escolhida arbritariamente.
+void desenhaBarras() {
+    int altura;
+    for (altura = 0; altura < 10; altura++) {
+        write(STDOUT_FILENO, "~\r\n", 3);
+    }
+}
+
+void limpaTela() {
+    // Printando 4bytes para uma sequência de 'escape' no terminal pra limpar a tela.
+    // Vai ajudar depois pra parte visual do programa.
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    // Re-Posiciona o cursor no canto-esquerdo superior.
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
+    desenhaBarras();
+    write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
 /*** Input ***/
 
 // Refatorando inteiro main aqui.
@@ -97,7 +111,8 @@ void processaTecla() {
 
     switch (chara) {
         case CTRL_KEY('q'):
-            limpaTela();
+            write(STDOUT_FILENO, "\x1b[2J", 4);
+            write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
             break;
     }
