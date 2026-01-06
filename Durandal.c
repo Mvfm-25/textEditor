@@ -77,7 +77,10 @@ int main() {
         if (iscntrl(chara)) {
             printf("%d\r\n", chara);
         } else {
-            printf("%d ('%c')\r\n", chara, chara);
+            // Printando valor Decimal na tabela ASCII.
+            printf("Dec : %d ('%c')\r\n", chara, chara);
+            // Printando valor Hexa da tabela ASCII
+            printf("Hex : %x\n", chara);
         }
 
         // Torna Ctrl-Q responsável pra saír do prgorama.
