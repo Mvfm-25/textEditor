@@ -15,7 +15,9 @@
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 /*** Terminal. ***/
+
 // Função pra lidar com MORTES
+// Erros. Mortes são erros. Simplesmente printa messagem de erro e sai do programa.
 void morre(const char *s) {
     perror(s);
     exit(1);
@@ -29,8 +31,7 @@ void desabilitaCru() {
     }
 }
 
-// Simplesmente, não vou estar mais printando o que o usuário digita enquanto digita.
-// Coisa de banco.
+// Flags para lidar com certas 'teclas especiais'.
 void modoCru() {
 
     if(tcgetattr(STDIN_FILENO,&termios_velho) == -1) {
@@ -63,28 +64,40 @@ void modoCru() {
     }
 }
 
+// Le tecla do usuário e retorna tal tecla.
+// Aqui para futuras funções de escape.
+char leTecla() {
+    int nLe;
+    char chara;
+
+    while ((nLe = read(STDIN_FILENO, &chara, 1)) != 1) {
+        if (nLe == -1 && errno == EAGAIN) morre("read");
+    }
+
+    return chara;
+}
+
+// Refatorando inteiro main aqui.
+// Vai ajudar com combinações Ctrl futuramente.
+void processaTecla() {
+    char chara = leTecla();
+
+    switch (chara) {
+        case CTRL_KEY('q'):
+            exit(0);
+            break;
+    }
+
+}
+
 /*** Init ***/
 int main() {
     modoCru();
 
-    // Main atualizado.
+    // Main ainda mais atualizado.
+    //Não printando mais as teclas por enquanto.
     while (1) {
-        char chara = '\0';
-
-        if (read(STDIN_FILENO, &chara, 1) == -1 && errno != EAGAIN){
-            morre("read");
-        }
-        if (iscntrl(chara)) {
-            printf("%d\r\n", chara);
-        } else {
-            // Printando valor Decimal na tabela ASCII.
-            printf("Dec : %d ('%c')\r\n", chara, chara);
-            // Printando valor Hexa da tabela ASCII
-            printf("Hex : %x\n", chara);
-        }
-
-        // Torna Ctrl-Q responsável pra saír do prgorama.
-        if (chara == CTRL_KEY('q')) break;
+        processaTecla();
     }
     return 0;
 }
