@@ -14,11 +14,21 @@
 /*** Definições ***/
 #define CTRL_KEY(k) ((k) & 0x1f)
 
+/*** Output ***/
+void limpaTela() {
+    // Printando 4bytes para uma sequência de 'escape' no terminal pra limpar a tela.
+    // Vai ajudar depois pra parte visual do programa.
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    // Re-Posiciona o cursor no canto-esquerdo superior.
+    write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
 /*** Terminal. ***/
 
 // Função pra lidar com MORTES
 // Erros. Mortes são erros. Simplesmente printa messagem de erro e sai do programa.
 void morre(const char *s) {
+    limpaTela();
     perror(s);
     exit(1);
 }
@@ -71,11 +81,14 @@ char leTecla() {
     char chara;
 
     while ((nLe = read(STDIN_FILENO, &chara, 1)) != 1) {
+        // 'EAGAIN' == recurso temporariamente indisponível.
         if (nLe == -1 && errno == EAGAIN) morre("read");
     }
 
     return chara;
 }
+
+/*** Input ***/
 
 // Refatorando inteiro main aqui.
 // Vai ajudar com combinações Ctrl futuramente.
@@ -84,6 +97,7 @@ void processaTecla() {
 
     switch (chara) {
         case CTRL_KEY('q'):
+            limpaTela();
             exit(0);
             break;
     }
@@ -95,8 +109,9 @@ int main() {
     modoCru();
 
     // Main ainda mais atualizado.
-    //Não printando mais as teclas por enquanto.
+    // Não printando mais as teclas por enquanto.
     while (1) {
+        limpaTela();
         processaTecla();
     }
     return 0;
