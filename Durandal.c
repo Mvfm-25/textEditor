@@ -1,7 +1,7 @@
 // Primeiros passos sendo tomados, seguindo tutorial
 // [mvfm]
 //
-// Criado : 05/01/2026  || Última modificação : 05/01/2026
+// Criado : 05/01/2026  || Última modificação : 06/01/2026
 
 /*** Includes ***/
 #include <ctype.h>
@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
+
+/*** Definições ***/
+#define CTRL_KEY(k) ((k) & 0x1f)
 
 /*** Terminal. ***/
 // Função pra lidar com MORTES
@@ -39,7 +42,9 @@ void modoCru() {
     // Todos esses comandos vem diretamente de <termios.h>
     // 'IXION' Impede com que Ctrl-S & Ctrl-Q controlem o 'software flow control'.
     // 'ICRNL' Lê literalmente Ctrl-M como 13, ao invés de 10.
-    cru.c_lflag &= ~(ICRNL | IXON);
+    cru.c_iflag &= ~(ICRNL | IXON);
+
+    // Tava com flag errado essa DISGRACE :fire: :fire: :fire:
 
     // Leitura literal de '\n', criação de novas linhas é explicitamente usada após.
     cru.c_lflag &= ~(OPOST);
@@ -69,14 +74,14 @@ int main() {
         if (read(STDIN_FILENO, &chara, 1) == -1 && errno != EAGAIN){
             morre("read");
         }
-        read(STDIN_FILENO, &chara, 1);
         if (iscntrl(chara)) {
             printf("%d\r\n", chara);
         } else {
             printf("%d ('%c')\r\n", chara, chara);
         }
 
-        if (chara == 'q') {break;}
+        // Torna Ctrl-Q responsável pra saír do prgorama.
+        if (chara == CTRL_KEY('q')) break;
     }
     return 0;
 }
